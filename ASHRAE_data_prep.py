@@ -24,6 +24,8 @@ def train_all():
     train['wday'] = train.timestamp.dt.dayofweek
     train['week'] = train.timestamp.dt.weekofyear
 
+    #Validation data
+
     X_train = train.loc[:,train.columns != 'meter_reading']
     y_train = train.loc[:,train.columns == 'meter_reading']
 

@@ -1,9 +1,11 @@
 import numpy as np
 
+# Meter dictionary
 def meter_dict():
     md = {0: 'electricity', 1: 'chilledwater', 2: 'steam', 3: 'hotwater'}
     return md
 
+# Creating submission file
 def submit(row,y):
     x = row
     x['meter_reading'] = np.maximum(0,y)
