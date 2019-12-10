@@ -133,6 +133,8 @@ def train_reg_cat():
     train.drop('year_built', inplace=True, axis = 1)
     train.drop('floor_count', inplace=True, axis = 1)
     train.drop('cloud_coverage', inplace=True, axis = 1)
+    train.drop('site_id', inplace=True, axis = 1)
+    train.drop('primary_use', inplace=True, axis = 1)
 
     # Imputation
     train = train.interpolate()
@@ -140,15 +142,12 @@ def train_reg_cat():
 
     # One Hot Encoding
     encode = OneHotEncoder(drop = 'first')
-    catego_var = train.loc[:,['meter','site_id','primary_use']].to_numpy()
+    catego_var = train.loc[:,['meter']].to_numpy()
     catego_var = encode.fit_transform(catego_var).toarray()
-    encode_names = ['meter_1','meter_2','meter_3','site_1','site_2','site_3','site_4','site_5','site_6','site_7','site_8','site_9','site_10','site_11','site_12','site_13','site_14','site_15',
-    'Entretainment','Food','Healthcare','Lodging','Manufacturing','Office','Other','Parking','Public','Religius','Retail','Services','Technology','Utility','Warehouse']
+    encode_names = ['meter_1','meter_2','meter_3']
     encode_var = pd.DataFrame(catego_var, columns = encode_names)
 
     train.drop('meter', inplace=True, axis = 1)
-    train.drop('site_id', inplace=True, axis = 1)
-    train.drop('primary_use', inplace=True, axis = 1)
 
     train = train.join(encode_var)
 
@@ -184,6 +183,8 @@ def test_reg_cat():
     test.drop('year_built', inplace=True, axis = 1)
     test.drop('floor_count', inplace=True, axis = 1)
     test.drop('cloud_coverage', inplace=True, axis = 1)
+    test.drop('site_id', inplace=True, axis = 1)
+    test.drop('primary_use', inplace=True, axis = 1)
 
     # Imputation
     test = test.interpolate()
@@ -191,15 +192,12 @@ def test_reg_cat():
 
     # One Hot Encoding
     encode = OneHotEncoder(drop = 'first')
-    catego_var = test.loc[:,['meter','site_id','primary_use']].to_numpy()
+    catego_var = test.loc[:,['meter']].to_numpy()
     catego_var = encode.fit_transform(catego_var).toarray()
-    encode_names = ['meter_1','meter_2','meter_3','site_1','site_2','site_3','site_4','site_5','site_6','site_7','site_8','site_9','site_10','site_11','site_12','site_13','site_14','site_15',
-    'Entretainment','Food','Healthcare','Lodging','Manufacturing','Office','Other','Parking','Public','Religius','Retail','Services','Technology','Utility','Warehouse']
+    encode_names = ['meter_1','meter_2','meter_3']
     encode_var = pd.DataFrame(catego_var, columns = encode_names)
 
     test.drop('meter', inplace=True, axis = 1)
-    test.drop('site_id', inplace=True, axis = 1)
-    test.drop('primary_use', inplace=True, axis = 1)
 
     test = test.join(encode_var)
 
