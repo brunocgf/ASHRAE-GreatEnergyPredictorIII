@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.impute import KNNImputer
+#from sklearn.impute import KNNImputer
 from sklearn.preprocessing import OneHotEncoder
 
 # First Model
@@ -250,11 +250,11 @@ def train_lasso():
     train.drop(train[train.hour==8].index, inplace=True)
     train.drop(train[train.hour==9].index, inplace=True)
     train.drop(train[train.hour==10].index, inplace=True)
-    train.drop(train[train.hour==12].index, inplace=True)
+    train.drop(train[train.hour==11].index, inplace=True)
     train.drop(train[train.hour==13].index, inplace=True)
     train.drop(train[train.hour==14].index, inplace=True)
     train.drop(train[train.hour==15].index, inplace=True)
-    train.drop(train[train.hour==17].index, inplace=True)
+    train.drop(train[train.hour==16].index, inplace=True)
     train.drop(train[train.hour==18].index, inplace=True)
     train.drop(train[train.hour==19].index, inplace=True)
     train.drop(train[train.hour==20].index, inplace=True)
@@ -291,7 +291,7 @@ def train_lasso():
     train.drop(train[train.week==53].index, inplace=True)
 
     # One Hot Encoding
-    encode = OneHotEncoder(drop = 'first')
+    encode = OneHotEncoder(categories='auto',drop = 'first')
     catego_var = train.loc[:,['building_id','meter']].to_numpy()
     #catego_var = train.loc[:,['meter']].to_numpy()
     catego_var = encode.fit_transform(catego_var).toarray()
@@ -305,7 +305,54 @@ def train_lasso():
     train = train.join(encode_var)
 
     # Split train-test
-    X_train = train.loc[:,train.columns != 'meter_reading']
-    y_train = train.loc[:,train.columns == 'meter_reading']
+    #X_train = train.loc[:,train.columns != 'meter_reading']
+    #y_train = train.loc[:,train.columns == 'meter_reading']
 
-    return X_train, y_train
+    return train
+
+
+def test_lasso():
+
+    test = pd.read_csv('./data/test.csv')
+    building_metadata = pd.read_csv('./data/building_metadata.csv')
+    weather_test = pd.read_csv('./data/weather_test.csv')
+
+    # Sort data for future imputation
+    test.sort_values(by=['building_id','timestamp'], inplace=True)
+
+    # Merging data
+    test = (test
+    .merge(building_metadata, on = 'building_id', how='left')
+    .merge(weather_test, on = ['site_id','timestamp'], how='left'))
+
+    del building_metadata
+    del weather_train
+
+    #Add dates variables
+    test['timestamp'] = pd.to_datetime(test['timestamp'])
+    test['hour'] = test.timestamp.dt.hour
+    test['wday'] = test.timestamp.dt.dayofweek
+    test['week'] = test.timestamp.dt.weekofyear
+
+    #Eliminate problematic variables
+    test.drop(['timestamp','year_built','floor_count','cloud_coverage','site_id','primary_use','wind_direction','square_feet','dew_temperature','sea_level_pressure','wind_speed','precip_depth_1_hr'], inplace=True, axis = 1)
+
+    # Imputation
+    test = test.interpolate()
+
+    # One Hot Encoding
+
+    encode = OneHotEncoder(categories='auto',drop = 'first')
+    catego_var = test.loc[:,['building_id','meter']].to_numpy()
+    catego_var = encode.fit_transform(catego_var).toarray()
+    encode_names = test.building_id.unique().tolist()[1:] + ['meter_1','meter_2','meter_3']
+    encode_var = pd.DataFrame(catego_var, columns = encode_names)
+
+    test.drop('meter', inplace=True, axis = 1)
+
+    test = test.join(encode_var)
+
+    # Add row as set_index
+    test.set_index('row_id', inplace=True)
+
+    return test
